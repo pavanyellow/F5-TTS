@@ -102,7 +102,6 @@ class F5TTSBenchmark:
                     gen_text=gen_text,
                     nfe_step=16,  # Fewer steps for warmup
                     show_info=lambda x: None,  # Silence output
-                    progress=tqdm,  # Use tqdm module
                 )
             
             # Clean up
@@ -180,23 +179,14 @@ class F5TTSBenchmark:
         # For TTFB, we need to measure when the first audio sample is generated
         # This requires accessing the internal inference process
         try:
-            # Use the internal inference process for detailed timing
-            wav, sr, spec = infer_process(
-                ref_audio,
-                ref_text,
-                gen_text,
-                self.f5tts.ema_model,
-                self.f5tts.vocoder,
-                self.f5tts.mel_spec_type,
-                show_info=lambda x: None,
-                progress=tqdm,
-                target_rms=0.1,
-                cross_fade_duration=0.15,
+            # Use the F5TTS API for inference
+            wav, sr, spec = self.f5tts.infer(
+                ref_file=ref_audio_path,
+                ref_text=ref_text,
+                gen_text=gen_text,
                 nfe_step=nfe_step,
                 cfg_strength=cfg_strength,
-                sway_sampling_coef=-1,
-                speed=1.0,
-                device=self.device,
+                show_info=lambda x: None,
             )
         except Exception as e:
             print(f"Inference error: {e}")
@@ -210,10 +200,6 @@ class F5TTSBenchmark:
         # Calculate RTF
         rtf = total_time / actual_gen_duration
         
-        # Estimate TTFB (this is an approximation since we don't have streaming)
-        # For transformer models, TTFB is typically a fraction of total inference time
-        estimated_ttfb = total_time * 0.1  # Rough estimate
-        
         # Get final GPU stats
         gpu_stats_end = self.get_gpu_stats()
         
@@ -223,7 +209,6 @@ class F5TTSBenchmark:
         
         return {
             'total_inference_time': total_time,
-            'estimated_ttfb': estimated_ttfb,
             'rtf': rtf,
             'actual_gen_duration': actual_gen_duration,
             'expected_gen_duration': expected_gen_duration,
@@ -269,7 +254,6 @@ class F5TTSBenchmark:
                 
                 # Print results
                 print(f"Total time: {result['total_inference_time']:.3f}s")
-                print(f"Estimated TTFB: {result['estimated_ttfb']:.3f}s")
                 print(f"RTF: {result['rtf']:.4f}")
                 print(f"Generated duration: {result['actual_gen_duration']:.3f}s")
                 if result['gpu_stats_end']:
