@@ -245,11 +245,7 @@ class CustomProgressiveStreamingTest:
         test_text = "Great! I'll read a quick disclaimer. Brian Thompson, today, on the twenty-fourth of June, twenty twenty five. You are authorizing a payment in the amount of two hundred and seventy dollars, plus a five dollars processing fee, dated on the twenty-fourth of June, twenty twenty five, using your VISA ending in one-two-three-four. By authorizing this payment, you agree that you are the account holder or authorized user. Please say yes to proceed with your payment."
         
         strategies = [
-            ([4, 16, 32], "Ultra Fast (4→16→32)"),
-            ([6, 16, 32], "Optimized (6→16→32)"),
-            ([8, 16, 32], "Standard (8→16→32)"),
-            ([8, 32, 32], "Fast+Quality (8→32→32)"),
-            ([32, 32, 32], "High Quality (32→32→32)")
+            ([6, 16, 32], "Optimized (6→16→32)")
         ]
         
         results = []
